@@ -26,11 +26,27 @@ app.post("/places", async (req, res) => {
 
 app.get("/places", async (req, res) => {
 	let query = req.query;
-	let params = {};
-	for (let key in query) {
-		params[key] = query[key].replaceAll("%", " ");
+	let response = await PlacesController.getPlaces(query);
+
+	if (response.status) {
+		return res.status(200).json(response.result);
+	} else {
+		return res.status(401).json(response.result);
 	}
-	res.status(200).json(params);
+});
+
+app.get("/places/slug/:id", async (req, res) => {
+	let response = await PlacesController.getSpecificPlace(req.params.id);
+
+	if (response.status) {
+		return res.status(200).json(response.result);
+	} else {
+		return res.status(401).json(response.result);
+	}
+});
+
+app.all(/.*/, (req, res) => {
+	res.staus(404).send("Page not Found");
 });
 
 app.listen(8080, () => console.log("Server is listening at PORT 8080"));

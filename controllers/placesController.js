@@ -1,10 +1,10 @@
 const PlacesModel = require("../models/placesModel");
 
-async function addPlaces({ name, slug, city, state }) {
+async function addPlaces({ name, city, state }) {
 	try {
 		const place = new PlacesModel({
 			name,
-			slug,
+			slug: name.replace(/ /g, "-").toLowerCase(),
 			city,
 			state,
 		});
@@ -15,10 +15,29 @@ async function addPlaces({ name, slug, city, state }) {
 	}
 }
 
-async function getSpecificPlace(name) {
+async function getPlaces(query) {
 	try {
-		let place = await PlacesModel.findOne({ name });
-		return { status: true, result: place };
+		let places = await PlacesModel.find(query);
+
+		if (places.length) {
+			return { status: true, result: places };
+		} else {
+			return { status: false, result: "No such place found" };
+		}
+	} catch (err) {
+		return { status: false, result: err.message };
+	}
+}
+
+async function getSpecificPlace(id) {
+	try {
+		let place = await PlacesModel.findOne({ slug: id });
+
+		if (place) {
+			return { status: true, result: place };
+		} else {
+			return { status: false, result: "Invalid Slug" };
+		}
 	} catch (err) {
 		return { status: false, result: err.message };
 	}
@@ -26,5 +45,6 @@ async function getSpecificPlace(name) {
 
 module.exports = {
 	addPlaces,
+	getPlaces,
 	getSpecificPlace,
 };
